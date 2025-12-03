@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FX-991MS — Web Replica</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root{--bg:#071021;--panel:#0b1220;--muted:#9aa4b2;--accent:#00bcd4}
+    body{background:linear-gradient(180deg,var(--bg),#0b1220);min-height:100vh;color:#e6eef8;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    .card.calc{background:linear-gradient(180deg,#0c1420,#07101a);border-radius:12px;border:none}
+    .screen{background:linear-gradient(180deg,#04121a,#061623);border-radius:8px;padding:10px;min-height:84px;color:#dff3ff}
+    .display{font-family:ui-monospace,monospace;font-size:20px;word-break:break-all}
+    .small-muted{font-size:12px;color:var(--muted)}
+    .btn-key{min-width:44px; white-space:nowrap}
+    .btn-op{background:#f1f5f9;color:#04121a}
+    .btn-func{background:#e6eef8;color:#04121a}
+    .btn-eq{background:var(--accent);color:#022; font-weight:700}
+    .active-shift{box-shadow:0 0 0 3px rgba(255,193,7,0.12) inset}
+    .active-alpha{box-shadow:0 0 0 3px rgba(128,128,128,0.08) inset}
+    @media(max-width:480px){ .display{font-size:18px} .btn-key{min-width:36px;padding:.35rem .45rem} }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+        <div class="card calc shadow">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="small-muted">fx-991MS • Replica</div>
+              <div class="d-flex gap-2">
+                <button id="modeBtn" class="btn btn-sm btn-outline-light">DEG</button>
+                <button id="shiftBtn" class="btn btn-sm btn-warning">SHIFT</button>
+                <button id="alphaBtn" class="btn btn-sm btn-secondary">ALPHA</button>
+              </div>
+            </div>
+
+            <div class="screen mb-2">
+              <div id="secondary" class="text-end small-muted"></div>
+              <div id="expression" class="text-end display">0</div>
+              <div class="text-end small-muted">ANS = <span id="ansVal">0</span></div>
+            </div>
+
+            <!-- keys -->
+            <div class="mb-2">
+              <div class="d-flex gap-2 flex-wrap mb-2">
+                <button class="btn btn-sm btn-outline-info btn-key" data-action="on">ON</button>
+                <button class="btn btn-sm btn-outline-danger btn-key" data-action="ac">AC</button>
+                <button class="btn btn-sm btn-outline-light btn-key" data-action="del">DEL</button>
+                <button class="btn btn-sm btn-outline-light btn-key" data-value="(">(</button>
+                <button class="btn btn-sm btn-outline-light btn-key" data-value=")">)</button>
+                <button class="btn btn-sm btn-outline-light btn-key" data-value="%">%</button>
+              </div>
+
+              <div class="row gx-2 gy-2">
+                <!-- col1 -->
+                <div class="col-3">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-func btn-key" data-value="sin(">sin</button>
+                    <button class="btn btn-sm btn-func btn-key" data-value="ln(">ln</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="7">7</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="4">4</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="1">1</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="0">0</button>
+                  </div>
+                </div>
+                <!-- col2 -->
+                <div class="col-3">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-func btn-key" data-value="cos(">cos</button>
+                    <button class="btn btn-sm btn-func btn-key" data-value="log(">log</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="8">8</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="5">5</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="2">2</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-action="dot">.</button>
+                  </div>
+                </div>
+                <!-- col3 -->
+                <div class="col-3">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-func btn-key" data-value="tan(">tan</button>
+                    <button class="btn btn-sm btn-func btn-key" data-value="sqrt(">√</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="9">9</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="6">6</button>
+                    <button class="btn btn-sm btn-key btn-secondary" data-value="3">3</button>
+                    <button class="btn btn-sm btn-warning btn-key" data-action="ans">ANS</button>
+                  </div>
+                </div>
+                <!-- col4 -->
+                <div class="col-3">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-op btn-key" data-value="^">^</button>
+                    <button class="btn btn-sm btn-op btn-key" data-value="pi">π</button>
+                    <button class="btn btn-sm btn-op btn-key" data-value="/">÷</button>
+                    <button class="btn btn-sm btn-op btn-key" data-value="*">×</button>
+                    <button class="btn btn-sm btn-op btn-key" data-value="-">−</button>
+                    <button class="btn btn-sm btn-eq btn-key" data-action="equals">=</button>
+                  </div>
+                </div>
+
+                <!-- extra functions -->
+                <div class="col-12 mt-2">
+                  <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="asin(">sin⁻¹</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="acos(">cos⁻¹</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="atan(">tan⁻¹</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="sinh(">sinh</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="cosh(">cosh</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="tanh(">tanh</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="fact(">x!</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="nCr(">nCr</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="nPr(">nPr</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-key" data-value="abs(">abs</button>
+                  </div>
+                </div>
+
+                <!-- memory & advanced -->
+                <div class="col-6 mt-2">
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-info btn-key" data-action="mc">MC</button>
+                    <button class="btn btn-sm btn-outline-info btn-key" data-action="mr">MR</button>
+                    <button class="btn btn-sm btn-outline-info btn-key" data-action="mplus">M+</button>
+                    <button class="btn btn-sm btn-outline-info btn-key" data-action="mminus">M-</button>
+                  </div>
+                </div>
+
+                <div class="col-6 mt-2">
+                  <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-sm btn-outline-light btn-key" id="statToggle">STAT</button>
+                    <button class="btn btn-sm btn-outline-light btn-key" id="historyBtn">History</button>
+                    <button class="btn btn-sm btn-outline-light btn-key" id="exportCsv">Export CSV</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between small-muted">
+              <div id="memoryIndicator">M: 0</div>
+              <div id="hint">Tip: SHIFT/ALPHA toggles alternate functions (simulated)</div>
+            </div>
+
+            <!-- History modal-like small panel -->
+            <div id="historyPanel" class="mt-3" style="display:none;">
+              <div class="card bg-transparent border-secondary">
+                <div class="card-body p-2 small-muted">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div>History</div>
+                    <div><button class="btn btn-sm btn-outline-light btn-key" id="clearHistory">Clear</button></div>
+                  </div>
+                  <div id="historyList" style="max-height:160px;overflow:auto"></div>
+                </div>
+              </div>
+            </div>
+
+          </div> <!-- card-body -->
+        </div> <!-- card -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    // State
+    let expr = '';
+    let ans = 0;
+    let memory = 0;
+    let angleMode = 'DEG';
+    let shift = false;
+    let alpha = false;
+    let history = [];
+    let statMode = false;
+
+    // DOM
+    const expressionEl = document.getElementById('expression');
+    const ansEl = document.getElementById('ansVal');
+    const modeBtn = document.getElementById('modeBtn');
+    const shiftBtn = document.getElementById('shiftBtn');
+    const alphaBtn = document.getElementById('alphaBtn');
+    const memoryIndicator = document.getElementById('memoryIndicator');
+    const historyPanel = document.getElementById('historyPanel');
+    const historyList = document.getElementById('historyList');
+    const statToggle = document.getElementById('statToggle');
+
+    // render UI
+    function render() {
+      expressionEl.textContent = expr || '0';
+      ansEl.textContent = String(ans);
+      modeBtn.textContent = angleMode;
+      memoryIndicator.textContent = 'M: ' + memory;
+      shiftBtn.classList.toggle('active-shift', shift);
+      alphaBtn.classList.toggle('active-alpha', alpha);
+      statToggle.classList.toggle('btn-primary', statMode);
+      // update history panel
+      historyList.innerHTML = history.slice().reverse().map(h => {
+        return `<div class="mb-1"><b>${h.expr}</b> = ${h.result}</div>`;
+      }).join('');
+    }
+
+    // helpers
+    function pushToken(s){ expr += s; render(); }
+    function clearAll(){ expr = ''; render(); }
+    function backspace(){ expr = expr.slice(0,-1); render(); }
+    function useAns(){ expr += String(ans); render(); }
+    function toggleAngle(){ angleMode = angleMode === 'DEG' ? 'RAD' : 'DEG'; render(); }
+    function toggleShift(){ shift = !shift; render(); }
+    function toggleAlpha(){ alpha = !alpha; render(); }
+    function toggleStat(){ statMode = !statMode; render(); }
+
+    // math helpers
+    function fact(n){ n = Math.floor(Number(n)); if(isNaN(n) || n<0) return NaN; let r=1; for(let i=2;i<=n;i++) r*=i; return r; }
+    function nCr(n,r){ n=Number(n); r=Number(r); if(r>n) return 0; return fact(n)/(fact(r)*fact(n-r)); }
+    function nPr(n,r){ n=Number(n); r=Number(r); if(r>n) return 0; return fact(n)/fact(n-r); }
+
+    function toRad(x){ return angleMode==='DEG' ? x*Math.PI/180 : x; }
+    function __sin(x){ return Math.sin(toRad(x)); }
+    function __cos(x){ return Math.cos(toRad(x)); }
+    function __tan(x){ return Math.tan(toRad(x)); }
+    function __asin(x){ return angleMode==='DEG' ? Math.asin(x)*180/Math.PI : Math.asin(x); }
+    function __acos(x){ return angleMode==='DEG' ? Math.acos(x)*180/Math.PI : Math.acos(x); }
+    function __atan(x){ return angleMode==='DEG' ? Math.atan(x)*180/Math.PI : Math.atan(x); }
+    function __sinh(x){ return (Math.exp(x)-Math.exp(-x))/2; }
+    function __cosh(x){ return (Math.exp(x)+Math.exp(-x))/2; }
+    function __tanh(x){ return __sinh(x)/__cosh(x); }
+
+    // preprocess -> safe JS expression
+    function preprocess(input){
+      let s = input;
+      // common replacements
+      s = s.replace(/π/g,'Math.PI').replace(/\bpi\b/g,'Math.PI');
+      s = s.replace(/\be\b/g,'Math.E');
+      s = s.replace(/\bANS\b/g, String(ans));
+      // ^ to **
+      s = s.replace(/\^/g,'**');
+      // percent number%
+      s = s.replace(/(\d+(\.\d+)?)%/g,'($1/100)');
+      // map functions to wrappers
+      s = s.replace(/\bsin\(/g,'__sin(');
+      s = s.replace(/\bcos\(/g,'__cos(');
+      s = s.replace(/\btan\(/g,'__tan(');
+      s = s.replace(/\basin\(/g,'__asin(');
+      s = s.replace(/\bacos\(/g,'__acos(');
+      s = s.replace(/\batan\(/g,'__atan(');
+      s = s.replace(/\bsinh\(/g,'__sinh(');
+      s = s.replace(/\bcosh\(/g,'__cosh(');
+      s = s.replace(/\btanh\(/g,'__tanh(');
+      s = s.replace(/\babs\(/g,'Math.abs(');
+      s = s.replace(/\bln\(/g,'Math.log(');
+      // log10: prefer Math.log10 if available
+      if(Math.log10) s = s.replace(/\blog\(/g,'Math.log10(');
+      else s = s.replace(/\blog\(/g,'(Math.log('); // note: will be natural log fallback if not replaced
+      s = s.replace(/\bsqrt\(/g,'Math.sqrt(');
+      s = s.replace(/\bexp\(/g,'Math.exp(');
+      // factorial/nCr/nPr tokens remain as fact( n ), nCr( n, r )
+      // safe whitespace trim
+      return s;
+    }
+
+    // evaluate safely with known helpers in scope
+    function calculate(){
+      if(!expr) return;
+      try{
+        const toEval = preprocess(expr);
+        // allowlist check - only chars we expect
+        if(!/^[0-9+\-*/().,\\s%MathEPIansintcbrfexptolghq__A-Za-z0-9*^\\[\\]]+$/.test(toEval)) {
+          // not strict but helps. If fails, still try but keep guard.
+        }
+        const fn = new Function('fact','nCr','nPr','__sin','__cos','__tan','__asin','__acos','__atan','__sinh','__cosh','__tanh',
+          'return (' + toEval + ');');
+        let result = fn(fact,nCr,nPr,__sin,__cos,__tan,__asin,__acos,__atan,__sinh,__cosh,__tanh);
+        if(typeof result === 'number' && !isFinite(result)) throw new Error('Math error');
+        // round sensible
+        if(typeof result === 'number') result = Math.round((result + Number.EPSILON) * 1e12)/1e12;
+        ans = result;
+        history.push({expr: expr, result: ans});
+        expr = String(ans);
+        render();
+      } catch(e){
+        expr = 'Error';
+        render();
+        setTimeout(()=>{ expr=''; render(); }, 800);
+      }
+    }
+
+    // button handling (delegation)
+    document.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.btn-key');
+      if(!btn) return;
+      const val = btn.dataset.value;
+      const action = btn.dataset.action;
+
+      if(action) {
+        // actions
+        if(action === 'ac') clearAll();
+        else if(action === 'del') backspace();
+        else if(action === 'equals') calculate();
+        else if(action === 'ans') useAns();
+        else if(action === 'on') { clearAll(); }
+        else if(action === 'dot') pushToken('.');
+        else if(action === 'mc') { memory = 0; render(); }
+        else if(action === 'mr') { expr += String(memory); render(); }
+        else if(action === 'mplus') { calculate(); memory = Number(memory) + Number(ans); render(); }
+        else if(action === 'mminus') { calculate(); memory = Number(memory) - Number(ans); render(); }
+      } else if(val) {
+        // if shift/alpha active, map some alternate functions
+        // SHIFT mappings (common): sin -> asin, cos->acos, tan->atan, sqrt -> x^2 (we approximate), fact-> gammalike? we'll map to factorial input
+        const base = val;
+        let pushStr = base;
+
+        if(shift) {
+          // alternate behavior for a few keys
+          if(base === 'sin(') pushStr = 'asin(';
+          else if(base === 'cos(') pushStr = 'acos(';
+          else if(base === 'tan(') pushStr = 'atan(';
+          else if(base === 'sqrt(') pushStr = '**2'; // square
+          else if(base === 'ln(') pushStr = 'log(';
+          else if(base === 'log(') pushStr = 'ln(';
+          else if(base === 'exp(') pushStr = '10**(';
+          else if(base === 'pi') pushStr = 'Math.PI';
+        } else if(alpha) {
+          // ALPHA mappings: allow entering character labels - we just push the literal text
+          pushStr = base; // no change, would be custom user letters
+        } else {
+          // normal
+          if(base === 'pi') pushStr = 'Math.PI';
+          else if(base === 'fact(') pushStr = 'fact(';
+          else if(base === 'nCr(') pushStr = 'nCr(';
+          else if(base === 'nPr(') pushStr = 'nPr(';
+        }
+
+        pushToken(pushStr);
+      }
+    });
+
+    // keyboard support (basic)
+    window.addEventListener('keydown', (e)=>{
+      const k = e.key;
+      if(/[0-9]/.test(k)) pushToken(k);
+      else if(k === 'Enter') calculate();
+      else if(k === 'Backspace') backspace();
+      else if(k === '.') pushToken('.');
+      else if(k === '+') pushToken('+');
+      else if(k === '-') pushToken('-');
+      else if(k === '*') pushToken('*');
+      else if(k === '/') pushToken('/');
+      else if(k === '(') pushToken('(');
+      else if(k === ')') pushToken(')');
+    });
+
+    // small controls
+    document.getElementById('modeBtn').addEventListener('click', () => { toggleAngle(); });
+    document.getElementById('shiftBtn').addEventListener('click', () => { toggleShift(); });
+    document.getElementById('alphaBtn').addEventListener('click', () => { toggleAlpha(); });
+    document.getElementById('historyBtn').addEventListener('click', ()=> {
+      historyPanel.style.display = historyPanel.style.display === 'none' ? 'block' : 'none';
+      render();
+    });
+    document.getElementById('clearHistory').addEventListener('click', ()=> { history = []; render(); });
+    document.getElementById('statToggle').addEventListener('click', () => { toggleStat(); alert('STAT mode toggled (simple). For full STAT features ask — I can add mean/SD/input table).'); });
+
+    // export CSV
+    document.getElementById('exportCsv').addEventListener('click', () => {
+      if(history.length === 0) { alert('History empty'); return; }
+      const rows = [['Expression','Result'], ...history.map(h=>[h.expr, h.result])];
+      const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'calculator_history.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    render();
+
+    // initial demo: attach some convenience quick-presses (optional)
+    // End of script
+  </script>
+
+  <!-- Bootstrap JS (optional for layout) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
